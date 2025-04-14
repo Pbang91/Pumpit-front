@@ -1,4 +1,3 @@
-<!-- src/App.svelte -->
 <script lang="ts">
   import DefaultLayout from './layout/DefaultLayout.svelte';
   import Router from 'svelte-spa-router';

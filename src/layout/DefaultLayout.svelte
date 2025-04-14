@@ -1,4 +1,3 @@
-<!-- src/layout/DefaultLayout.svelte -->
 <script lang="ts">
     import Header from '../components/Header.svelte';
     import Sidebar from '../components/Sidebar.svelte';

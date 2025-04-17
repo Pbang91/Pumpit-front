@@ -1,4 +1,6 @@
 <script lang="ts">
+  export let className: string = ''; // className prop 정의
+
   const menus = [
     { name: '피드', href: '/feed' },
     { name: '운동기록', href: '/log' },
@@ -7,7 +9,7 @@
   ];
 </script>
 
-<aside class="w-48 bg-gray-100 border-r h-full p-4 space-y-2">
+<aside class={`h-full overflow-auto w-64 bg-gray-800 text-white ${className}`}>
   {#each menus as { name, href }}
     <a class="block cursor-pointer px-3 py-2 rounded hover:bg-gray-200 transition" {href}>
       {name}

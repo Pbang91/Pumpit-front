@@ -11,7 +11,7 @@
   };
 </script>
 
-<div class="flex items-center justify-center h-screen bg-gray-50">
+<div class="flex items-center justify-center h-full bg-gray-50">
   <div class="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold mb-6 text-center">회원가입</h1>
 

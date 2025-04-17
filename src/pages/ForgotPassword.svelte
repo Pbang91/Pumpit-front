@@ -1,5 +1,6 @@
 <script lang="ts">
   let email = '';
+  import { link } from 'svelte-spa-router';
 
   const handleSubmit = () => {
     // TODO: 이메일 전송 로직
@@ -7,7 +8,7 @@
   };
 </script>
 
-<div class="flex items-center justify-center h-screen bg-gray-50">
+<div class="flex items-center justify-center h-full bg-gray-50">
   <div class="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold mb-6 text-center">비밀번호 찾기</h1>
 
@@ -29,7 +30,7 @@
     </form>
 
     <div class="text-center text-sm text-gray-500 mt-4">
-      <a href="/login" class="hover:underline">← 로그인으로 돌아가기</a>
+      <a href="/login" use:link class="hover:underline">← 로그인으로 돌아가기</a>
     </div>
   </div>
 </div>

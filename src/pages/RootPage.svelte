@@ -2,8 +2,8 @@
   import { link } from 'svelte-spa-router';
 </script>
 
-<div class="min-h-screen bg-gray-50 flex items-center justify-center">
-  <div class="text-center space-y-6 max-w-lg p-6">
+<div class="flex items-center justify-center h-full bg-gray-50">
+  <div class="text-center space-y-6 max-w-lg px-4">
     <h1 class="text-4xl font-bold text-blue-600">PumpIt</h1>
     <p class="text-lg text-gray-700">운동을 기록하고, 나누고, 성장하세요 💪</p>
 

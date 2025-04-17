@@ -1,12 +1,37 @@
 <script lang="ts">
+  import axios from 'axios';
   import { link } from 'svelte-spa-router';
+  import type { AuthTokenResponse, EmailLoginRequest, EmailLoginResponse } from '../types/user';
+  import type { ApiSuccessResponse } from '../types/api';
+  const emailLoginUrl = import.meta.env.VITE_API_URL + '/users/email/login';
+  const authUrl = import.meta.env.VITE_API_URL + '/users/auth';
 
   let email = '';
   let password = '';
 
-  const login = () => {
-    // TODO: 인증 로직
-    console.log('로그인 시도', email, password);
+  const login = async () => {
+    const payload: EmailLoginRequest = {
+      email,
+      password,
+    };
+
+    const loginRes = await axios.post<ApiSuccessResponse<EmailLoginResponse>>(
+      emailLoginUrl,
+      payload
+    );
+
+    if (loginRes.status >= 200 && loginRes.status < 300) {
+      const tempCode = loginRes.data.data.tempCode;
+      console.log(tempCode);
+      const tokenRes = await axios.get<ApiSuccessResponse<AuthTokenResponse>>(
+        `${authUrl}?c=${tempCode}`
+      );
+
+      if (tokenRes.status >= 200 && tokenRes.status < 300) {
+        localStorage.setItem('accessToken', tokenRes.data.data.accessToken);
+        localStorage.setItem('refreshToken', tokenRes.data.data.refreshToken);
+      }
+    }
   };
 
   const kakaoLogin = async () => {
@@ -16,7 +41,7 @@
   };
 </script>
 
-<div class="flex items-center justify-center h-screen bg-gray-50">
+<div class="flex items-center justify-center h-full bg-gray-50">
   <div class="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
     <h1 class="text-2xl font-bold mb-6 text-center">PumpIt 로그인</h1>
 

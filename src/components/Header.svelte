@@ -1,8 +1,9 @@
 <script lang="ts">
-  export let title: string = 'PumpIt';
+  import { link } from 'svelte-spa-router';
 </script>
 
-<header class="h-14 px-6 flex items-center justify-between bg-white border-b shadow-sm">
-  <div class="text-xl font-bold">{title}</div>
-  <div class="text-sm text-gray-500">운동 기록 & 커뮤니티 플랫폼</div>
+<header class="h-14 px-4 flex items-center justify-between bg-white border-b shadow-sm">
+  <div class="flex justify-start">
+    <a href="/" use:link class="text-sm text-gray-500"> Pump It! </a>
+  </div>
 </header>

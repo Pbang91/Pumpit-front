@@ -1,66 +1,96 @@
 <script lang="ts">
-  import axios from 'axios';
-  import { link } from 'svelte-spa-router';
+  import { setAuth } from '../stores/authStore';
+  import { push, link } from 'svelte-spa-router';
+  import api from '../lib/api';
   import type { AuthTokenResponse, EmailLoginRequest, EmailLoginResponse } from '../types/user';
   import type { ApiSuccessResponse } from '../types/api';
-  const emailLoginUrl = import.meta.env.VITE_API_URL + '/users/email/login';
-  const authUrl = import.meta.env.VITE_API_URL + '/users/auth';
 
   let email = '';
   let password = '';
+  let rememberMe = false;
 
-  const login = async () => {
+  const emailLoginUrl = import.meta.env.VITE_API_URL + '/users/email/login';
+  const authUrl = import.meta.env.VITE_API_URL + '/users/auth';
+
+  const loginWithEmail = async () => {
     const payload: EmailLoginRequest = {
       email,
       password,
     };
 
-    const loginRes = await axios.post<ApiSuccessResponse<EmailLoginResponse>>(
-      emailLoginUrl,
-      payload
-    );
+    const loginRes = await api.post<ApiSuccessResponse<EmailLoginResponse>>(emailLoginUrl, payload);
 
     if (loginRes.status >= 200 && loginRes.status < 300) {
       const tempCode = loginRes.data.data.tempCode;
-      console.log(tempCode);
-      const tokenRes = await axios.get<ApiSuccessResponse<AuthTokenResponse>>(
+      const tokenRes = await api.get<ApiSuccessResponse<AuthTokenResponse>>(
         `${authUrl}?c=${tempCode}`
       );
 
       if (tokenRes.status >= 200 && tokenRes.status < 300) {
-        localStorage.setItem('accessToken', tokenRes.data.data.accessToken);
-        localStorage.setItem('refreshToken', tokenRes.data.data.refreshToken);
+        const accessToken = tokenRes.data.data.accessToken;
+        const refreshToken = tokenRes.data.data.refreshToken;
+
+        setAuth(accessToken, refreshToken);
+
+        push('/log');
       }
     }
   };
 
-  const kakaoLogin = async () => {
+  const loginWithKakao = async () => {
     const res = await fetch('env 설정을 하자요');
     const { redirectUrl } = await res.json();
     window.location.href = redirectUrl;
   };
 </script>
 
-<div class="flex items-center justify-center h-full bg-gray-50">
-  <div class="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
-    <h1 class="text-2xl font-bold mb-6 text-center">PumpIt 로그인</h1>
+<div class="flex-1 flex items-center justify-center bg-gray-50">
+  <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-md space-y-6">
+    <h1 class="text-2xl font-bold text-center text-gray-800">Hello PumpIt</h1>
 
-    <form class="space-y-4" on:submit|preventDefault={login}>
-      <input
-        type="email"
-        bind:value={email}
-        placeholder="이메일"
-        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        required
-      />
+    <form on:submit|preventDefault={loginWithEmail} class="space-y-4">
+      <div class="relative">
+        <label for="email" class="text-sm text-gray-600 block mb-1">이메일</label>
+        <input
+          id="email"
+          type="email"
+          bind:value={email}
+          placeholder="이메일을 입력해주세요"
+          class="w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none py-2 text-sm placeholder-gray-400"
+        />
+      </div>
 
-      <input
-        type="password"
-        bind:value={password}
-        placeholder="비밀번호"
-        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        required
-      />
+      <div class="relative">
+        <label for="password" class="text-sm text-gray-600 block mb-1">비밀번호</label>
+        <input
+          id="password"
+          type="password"
+          bind:value={password}
+          placeholder="비밀번호를 입력해 주세요."
+          class="w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none py-2 text-sm placeholder-gray-400"
+        />
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          bind:checked={rememberMe}
+          class="appearance-none w-5 h-5 rounded-md border border-gray-300 checked:bg-blue-600 checked:border-blue-600
+                 flex items-center justify-center transition-colors duration-150"
+        />
+        <span>로그인 유지하기</span>
+      </label>
+
+      <style>
+        input[type='checkbox']:checked::before {
+          content: '✔';
+          display: block;
+          color: white;
+          font-size: 0.75rem;
+          text-align: center;
+          line-height: 1.25rem;
+        }
+      </style>
 
       <button
         type="submit"
@@ -70,25 +100,23 @@
       </button>
     </form>
 
-    <div class="flex justify-between text-sm text-gray-500 mt-4">
+    <div class="flex justify-between text-sm text-gray-500">
       <a href="/signup" use:link class="hover:underline">회원가입</a>
       <a href="/forgot" use:link class="hover:underline">비밀번호 찾기</a>
     </div>
 
-    <div class="my-4 text-center text-gray-400 text-sm">또는</div>
+    <div class="text-center text-sm text-gray-400">또는</div>
 
-    <div class="space-y-2">
-      <button
-        on:click={kakaoLogin}
-        class="w-full flex items-center justify-center gap-2 py-2 rounded bg-yellow-300 hover:bg-yellow-400 transition"
-      >
-        <img
-          src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png"
-          alt="kakao icon"
-          class="w-5 h-5"
-        />
-        <span class="text-sm font-semibold text-gray-800">Kakao로 로그인</span>
-      </button>
-    </div>
+    <button
+      on:click={loginWithKakao}
+      class="w-full flex items-center justify-center gap-2 py-2 rounded bg-yellow-300 hover:bg-yellow-400 transition"
+    >
+      <img
+        src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png"
+        alt="kakao icon"
+        class="w-5 h-5"
+      />
+      <span class="text-sm font-semibold text-gray-800">Kakao로 로그인</span>
+    </button>
   </div>
 </div>

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { setAuth } from '../stores/authStore';
   import { push, link } from 'svelte-spa-router';
-  import api from '../lib/api';
+  import api from '../lib/customApi';
   import type { AuthTokenResponse, EmailLoginRequest, EmailLoginResponse } from '../types/user';
-  import type { ApiSuccessResponse } from '../types/api';
+  import { ERROR_MESSAEGS, type ApiExceptionResponse, type ApiSuccessResponse } from '../types/api';
+  import axios from 'axios';
 
   let email = '';
   let password = '';
@@ -18,21 +19,41 @@
       password,
     };
 
-    const loginRes = await api.post<ApiSuccessResponse<EmailLoginResponse>>(emailLoginUrl, payload);
-
-    if (loginRes.status >= 200 && loginRes.status < 300) {
-      const tempCode = loginRes.data.data.tempCode;
-      const tokenRes = await api.get<ApiSuccessResponse<AuthTokenResponse>>(
-        `${authUrl}?c=${tempCode}`
+    try {
+      const loginRes = await api.post<ApiSuccessResponse<EmailLoginResponse>>(
+        emailLoginUrl,
+        payload
       );
 
-      if (tokenRes.status >= 200 && tokenRes.status < 300) {
+      const tempCode = loginRes.data.data.tempCode;
+
+      try {
+        const tokenRes = await api.get<ApiSuccessResponse<AuthTokenResponse>>(
+          `${authUrl}?c=${tempCode}&r=${rememberMe}`
+        );
+
         const accessToken = tokenRes.data.data.accessToken;
         const refreshToken = tokenRes.data.data.refreshToken;
 
-        setAuth(accessToken, refreshToken);
+        setAuth(accessToken, refreshToken, rememberMe);
 
         push('/log');
+      } catch (e) {
+        if (axios.isAxiosError(e) && e.response?.data) {
+          const apiErr = e.response.data as ApiExceptionResponse;
+          const message =
+            ERROR_MESSAEGS[apiErr.code] ?? apiErr.description ?? '알 수 없는 에러입니다';
+
+          alert(message);
+        }
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e) && e.response?.data) {
+        const apiErr = e.response.data as ApiExceptionResponse;
+        const message =
+          ERROR_MESSAEGS[apiErr.code] ?? apiErr.description ?? '알 수 없는 에러입니다';
+
+        alert(message);
       }
     }
   };

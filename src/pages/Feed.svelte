@@ -3,17 +3,17 @@
   import { authStore } from '../stores/authStore';
   import { get } from 'svelte/store';
   import { onMount } from 'svelte';
-  import api from '../lib/api';
+  import api from '../lib/customApi';
   import { mockPosts } from '../lib/mock/posts';
 
   let posts = mockPosts;
 
   const { isLoggedIn } = get(authStore);
 
-  onMount(async () => {
-    const res = await api.get('/posts');
-    posts = res.data.data; // 예: { id, title, content, createdAt, user: { id, nickname } }
-  });
+  // onMount(async () => {
+  //   const res = await api.get('/posts');
+  //   posts = res.data.data; // 예: { id, title, content, createdAt, user: { id, nickname } }
+  // });
 </script>
 
 <div class="max-w-2xl mx-auto py-8 px-4 space-y-4">

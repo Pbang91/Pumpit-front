@@ -11,3 +11,11 @@ export interface AuthTokenResponse {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface User {
+  id: number;
+  email: string | null;
+  nickName: string | null;
+  oauthProviders: string[];
+  createdAt: string;
+}

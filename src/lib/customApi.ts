@@ -1,16 +1,19 @@
 import axios from 'axios';
+import { push } from 'svelte-spa-router';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  withCredentials: true,
+  withCredentials: import.meta.env.MODE == 'prod' ? true : false,
 });
 
 // 요청 인터셉터: JWT 자동 추가
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken') ?? localStorage.getItem('accessToken');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
@@ -18,10 +21,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err.response?.status;
+
+    if (status === 401) {
+      sessionStorage.removeItem('accessToken');
       localStorage.removeItem('accessToken');
-      window.location.href = '/login';
+      push('/login');
+    } else if (status >= 500) {
+      alert('서버 문제 발생. 잠시 후 다시 시도해주세요');
     }
+
     return Promise.reject(err);
   }
 );

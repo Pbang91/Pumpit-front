@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { AuthState } from '../types/auth';
+import type { AuthState } from '@/types/auth';
 
 const accessToken = localStorage.getItem('accessToken') ?? sessionStorage.getItem('accessToken');
 const refreshToken = localStorage.getItem('refreshToken') ?? sessionStorage.getItem('refreshToken');

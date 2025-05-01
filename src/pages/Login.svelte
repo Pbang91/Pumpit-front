@@ -1,17 +1,16 @@
 <script lang="ts">
-  import { setAuth } from '../stores/authStore';
   import { push, link } from 'svelte-spa-router';
-  import api from '../lib/customApi';
-  import type { AuthTokenResponse, EmailLoginRequest, EmailLoginResponse } from '../types/user';
-  import { ERROR_MESSAEGS, type ApiExceptionResponse, type ApiSuccessResponse } from '../types/api';
+  import api from '@lib/customApi';
+  import type { EmailLoginRequest, IssueAuthCodeResponse } from '@/types/user';
+  import { ERROR_MESSAEGS, type ApiExceptionResponse, type ApiSuccessResponse } from '@/types/api';
   import axios from 'axios';
+  import { fetchAuthToken } from '@/lib/api/authToken';
 
   let email = '';
   let password = '';
   let rememberMe = false;
 
   const emailLoginUrl = import.meta.env.VITE_API_URL + '/users/email/login';
-  const authUrl = import.meta.env.VITE_API_URL + '/users/auth';
 
   const loginWithEmail = async () => {
     const payload: EmailLoginRequest = {
@@ -20,33 +19,11 @@
     };
 
     try {
-      const loginRes = await api.post<ApiSuccessResponse<EmailLoginResponse>>(
-        emailLoginUrl,
-        payload
-      );
+      const res = await api.post<ApiSuccessResponse<IssueAuthCodeResponse>>(emailLoginUrl, payload);
 
-      const tempCode = loginRes.data.data.tempCode;
+      await fetchAuthToken(res.data.data.tempCode, rememberMe);
 
-      try {
-        const tokenRes = await api.get<ApiSuccessResponse<AuthTokenResponse>>(
-          `${authUrl}?c=${tempCode}&r=${rememberMe}`
-        );
-
-        const accessToken = tokenRes.data.data.accessToken;
-        const refreshToken = tokenRes.data.data.refreshToken;
-
-        setAuth(accessToken, refreshToken, rememberMe);
-
-        push('/log');
-      } catch (e) {
-        if (axios.isAxiosError(e) && e.response?.data) {
-          const apiErr = e.response.data as ApiExceptionResponse;
-          const message =
-            ERROR_MESSAEGS[apiErr.code] ?? apiErr.description ?? '알 수 없는 에러입니다';
-
-          alert(message);
-        }
-      }
+      push('/log');
     } catch (e) {
       if (axios.isAxiosError(e) && e.response?.data) {
         const apiErr = e.response.data as ApiExceptionResponse;

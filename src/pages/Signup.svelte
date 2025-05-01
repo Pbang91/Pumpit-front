@@ -1,13 +1,39 @@
 <script lang="ts">
   import { push, link } from 'svelte-spa-router';
-  let name = '';
-  let email = '';
-  let password = '';
+  import type { EmailSignupRequest, IssueAuthCodeResponse } from '@/types/user';
+  import api from '@lib/customApi';
+  import { type ApiExceptionResponse, type ApiSuccessResponse, ERROR_MESSAEGS } from '@/types/api';
+
+  import axios from 'axios';
+  import { fetchAuthToken } from '@lib/api/authToken';
+
+  const signupPayload: EmailSignupRequest = {
+    email: '',
+    nickName: '',
+    password: '',
+    phone: null,
+  };
+
+  const emailSignupUrl = import.meta.env.VITE_API_URL + '/users/email';
 
   const signup = async () => {
-    // TODO: 실제 API 연결
-    console.log({ name, email, password });
-    // 가입 완료 후 로그인 페이지로
+    try {
+      const res = await api.post<ApiSuccessResponse<IssueAuthCodeResponse>>(
+        emailSignupUrl,
+        signupPayload
+      );
+
+      await fetchAuthToken(res.data.data.tempCode, false);
+      push('/log');
+    } catch (e) {
+      if (axios.isAxiosError(e) && e.response?.data) {
+        const apiErr = e.response.data as ApiExceptionResponse;
+        const message =
+          ERROR_MESSAEGS[apiErr.code] ?? apiErr.description ?? '알 수 없는 오류 입니다';
+
+        alert(message);
+      }
+    }
     push('/login');
   };
 </script>
@@ -18,34 +44,45 @@
 
     <form on:submit|preventDefault={signup} class="space-y-4">
       <div>
-        <label for="name" class="text-sm text-gray-600 block mb-1">이름</label>
+        <label for="nickName" class="text-sm text-gray-600 block mb-1">닉네임(필수)</label>
         <input
-          id="name"
+          id="nickName"
           type="text"
-          bind:value={name}
-          placeholder="보여줄 이름을 입력해 주세요."
+          bind:value={signupPayload.nickName}
+          placeholder="프로필명을 입력해주세요"
           class="w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none py-2 text-sm placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label for="email" class="text-sm text-gray-600 block mb-1">이메일</label>
+        <label for="email" class="text-sm text-gray-600 block mb-1">이메일(필수)</label>
         <input
           id="email"
           type="email"
-          bind:value={email}
+          bind:value={signupPayload.email}
           placeholder="이메일을 입력해 주세요."
           class="w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none py-2 text-sm placeholder-gray-400"
         />
       </div>
 
       <div>
-        <label for="password" class="text-sm text-gray-600 block mb-1">비밀번호</label>
+        <label for="password" class="text-sm text-gray-600 block mb-1">비밀번호(필수)</label>
         <input
           id="password"
           type="password"
-          bind:value={password}
+          bind:value={signupPayload.password}
           placeholder="비밀번호를 입력해 주세요."
+          class="w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none py-2 text-sm placeholder-gray-400"
+        />
+      </div>
+
+      <div>
+        <label for="phone" class="text-sm text-gray-400 block mb-1">모바일 번호(선택)</label>
+        <input
+          id="phone"
+          type="tel"
+          bind:value={signupPayload.phone}
+          placeholder="전화번호를 입력해 주세요. 입력 시 정보 제공에 활용됩니다"
           class="w-full border-b border-gray-300 focus:border-blue-500 focus:outline-none py-2 text-sm placeholder-gray-400"
         />
       </div>

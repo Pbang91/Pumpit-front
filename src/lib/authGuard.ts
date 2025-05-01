@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import { authStore } from '../stores/authStore';
+import { authStore } from '@stores/authStore';
 import { push } from 'svelte-spa-router';
 
 export const guardRoot = () => {

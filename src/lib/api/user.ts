@@ -1,7 +1,7 @@
 // src/lib/api/user.ts
-import api from '../customApi';
-import { type ApiSuccessResponse } from '../../types/api';
-import type { User } from '../../types/user';
+import api from '@lib/customApi';
+import { type ApiSuccessResponse } from '@/types/api';
+import type { User } from '@/types/user';
 
 export const fetchProfile = async (): Promise<User | null> => {
   try {

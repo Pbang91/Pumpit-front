@@ -1,6 +1,6 @@
 <script lang="ts">
   import { link } from 'svelte-spa-router';
-  import { authStore } from '../stores/authStore';
+  import { authStore } from '@stores/authStore';
 </script>
 
 <header class="bg-white border-b shadow-sm">

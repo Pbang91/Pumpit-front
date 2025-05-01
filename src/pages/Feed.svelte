@@ -1,10 +1,8 @@
 <script lang="ts">
-  import PostCard from '../components/Post/PostCard.svelte';
-  import { authStore } from '../stores/authStore';
+  import PostCard from '@components/Post/PostCard.svelte';
+  import { authStore } from '@stores/authStore';
   import { get } from 'svelte/store';
-  import { onMount } from 'svelte';
-  import api from '../lib/customApi';
-  import { mockPosts } from '../lib/mock/posts';
+  import { mockPosts } from '@lib/mock/posts';
 
   let posts = mockPosts;
 

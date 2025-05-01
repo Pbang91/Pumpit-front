@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { authStore, clearAuth } from '../stores/authStore';
+  import { authStore, clearAuth } from '@/stores/authStore';
   import { push } from 'svelte-spa-router';
   import { onMount } from 'svelte';
-  import { userStore, clearUser } from '../stores/userStore';
-  import { fetchProfile } from '../lib/api/user';
+  import { userStore, clearUser } from '@/stores/userStore';
+  import { fetchProfile } from '@/lib/api/user';
 
   onMount(async () => {
     const user = await fetchProfile();
